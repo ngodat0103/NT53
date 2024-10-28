@@ -1,0 +1,8 @@
+secrets
+tf/.terraform
+tf/.terraform.lock.hcl
+.vscode
+ansible/.vagrant
+ansible/.vagrant.lock
+ansible/.vscode
+

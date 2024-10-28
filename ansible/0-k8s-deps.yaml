@@ -1,0 +1,96 @@
+- name: Kubernetes Dependencies
+  hosts: all
+  become: true
+  tasks:
+    - name: Disable swab
+      ansible.builtin.command: swapoff -a
+      changed_when: true
+    - name: Remove swap entry from /etc/fstab
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '(^.*swap.*$)'
+        replace: '#\1'
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - socat
+          - net-tools
+        state: present
+    - name: Add Kubernetes GPG key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+        state: present
+        keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    - name: Add Kubernetes repository
+      ansible.builtin.apt_repository:
+        repo: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /
+        state: present
+    - name: Install Kubernetes components
+      ansible.builtin.apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+          - kubernetes-cni
+          - containerd
+        state: present
+        update_cache: true
+    - name: Create containerd configuration directory
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+        mode: '0755'
+    - name: Generate default containerd configuration
+      ansible.builtin.shell:
+        cmd: |-
+          rm -f /etc/containerd/config.toml
+          containerd config default > /etc/containerd/config.toml
+        creates: /etc/containerd/config.tom
+      changed_when: true
+    - name: Configure containerd to use systemd as cgroup driver
+      ansible.builtin.replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+    - name: Restart containerd service
+      ansible.builtin.service:
+        name: containerd
+        state: restarted
+        enabled: true
+    - name: Configure network settings
+      block:
+        - name: Enable IP forwarding
+          ansible.posix.sysctl:
+            name: net.ipv4.ip_forward
+            value: '1'
+            state: present
+            reload: true
+        - name: Load br_netfilter module
+          community.general.modprobe:
+            name: br_netfilter
+            state: present
+            persistent: present
+        - name: Ensure net.bridge.bridge-nf-call-iptables is set in sysctl.conf
+          ansible.builtin.lineinfile:
+            path: /etc/sysctl.conf
+            regexp: '^net.bridge.bridge-nf-call-iptables'
+            line: 'net.bridge.bridge-nf-call-iptables = 1'
+            state: present
+        - name: Apply sysctl settings from /etc/sysctl.conf
+          ansible.builtin.command: sysctl -p /etc/sysctl.conf
+          changed_when: true
+        - name: Set node IP address
+          ansible.builtin.replace:
+            path: /etc/default/kubelet
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}'
+        - name: Stop apparmor
+          ansible.builtin.service:
+            name: apparmor
+            state: stopped
+            enabled: false

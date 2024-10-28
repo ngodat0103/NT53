@@ -1,0 +1,54 @@
+- name: Initialize Kubernetes master node
+  hosts: masters
+  become: true
+  tasks:
+    - name: Initialize Kubernetes master node
+      ansible.builtin.command:
+        chdir: /root
+        cmd: |-
+          kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ ansible_host }}
+        creates: kubeadm-init.log
+    - name: Create .kube directory
+      ansible.builtin.file:
+        path: /root/.kube
+        state: directory
+        mode: '0755'
+    - name: Copy Kubernetes configuration file
+      ansible.builtin.command:
+        cmd: "cp -i /etc/kubernetes/admin.conf ~/.kube/config"
+        creates: /root/.kube/config
+    - name: Export KUBECONFIG environment variable
+      ansible.builtin.lineinfile:
+        path: /root/.bashrc
+        line: "export KUBECONFIG=/root/.kube/config"
+        state: present
+      changed_when: true
+    - name: Set up change namespace alias
+      ansible.builtin.lineinfile:
+        path: /root/.bashrc
+        line: "alias kns='kubectl config set-context --current --namespace '"
+        state: present
+    - name: Install helm if not exists
+      ansible.builtin.unarchive:
+        src: https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        extra_opts: "--strip-components=1"
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+      args:
+        creates: /usr/local/bin/helm
+- name: Join worker nodes to the Kubernetes cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Fetch join command from master
+      ansible.builtin.command: kubeadm token create --print-join-command
+      delegate_to: master
+      register: join_command
+      changed_when: false
+    - name: Join worker nodes to the Kubernetes cluster
+      ansible.builtin.command:
+        cmd: "{{ join_command.stdout_lines[0] }}"
+        creates: /root/kubeadm-join.log
