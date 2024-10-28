@@ -1,0 +1,40 @@
+spring:
+  sleuth:
+    sampler:
+      probability: 1.0
+  config:
+    activate:
+      on-profile: local-dev
+  cloud:
+    inetutils:
+      default-hostname: "yamp-backend.local"
+
+  data:
+    redis:
+      url: redis://localhost:6379
+      client-type: lettuce
+      database: 1
+      client-name: gateway-svc
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /ui-docs
+    enabled: true
+    oauth:
+      use-basic-authentication-with-access-code-grant: true
+      client-id: ${CLIENT_ID}
+      client-secret: ${CLIENT_SECRET}
+
+    oauth2-redirect-url: http://${spring.cloud.inetutils.default-hostname}:${server.port}/webjars/swagger-ui/oauth2-redirect.html
+    urls:
+      - name: "auth-svc"
+        url: "http://${spring.cloud.inetutils.default-hostname}:${server.port}/api/v1/auth/api-docs"
+      - name: "user-svc"
+        url: "http://${spring.cloud.inetutils.default-hostname}:${server.port}/api/v1/users/api-docs"
+      - name: "product-svc"
+        url: "http://${spring.cloud.inetutils.default-hostname}:${server.port}/api/v1/product/api-docs"
+    use-root-path: true
+logging:
+  level:
+    org.springframework.security: DEBUG

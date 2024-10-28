@@ -1,0 +1,67 @@
+spring:
+  profiles:
+    default: local-dev
+  config:
+    import:
+      - "optional:local-dev.yaml"
+      - "optional:unit-test.yaml"
+      - "optional:integration-test.yaml"
+      - "optional:pre-prod.yaml"
+      - "optional:prod.yaml"
+  application:
+    name: user-svc
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-svc:8001/api/v1/auth/oauth2/jwks
+          authorities-claim-name: "roles"
+          authority-prefix: "ROLE_"
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+server:
+  port: 8002
+  forward-headers-strategy: framework
+logging:
+  level:
+    com.example.yamp.usersvc.controller: DEBUG
+    com.example.yamp.usersvc.service: debug
+  pattern:
+    level:  "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+springdoc:
+  api-docs:
+    path: /api/v1/users/api-docs
+  swagger-ui:
+    path: /api/v1/users/ui-docs
+  open-api:
+    info:
+      version: ${APP_VERSION}
+      title: User Service
+      description: User Service API
+      contact:
+        name: NgoDat0103
+        url: https://github.com/NGODAT0103
+        email: 21521935@gm.uit.edu.vn
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

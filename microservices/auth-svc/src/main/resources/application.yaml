@@ -1,0 +1,76 @@
+spring:
+
+  profiles:
+    default: local-dev
+  config:
+    import:
+      - "optional:unit-test.yaml"
+      - "optional:local-dev.yaml"
+      - "optional:demo.yaml"
+      - "optional:integration-test.yaml"
+      - "optional:pre-prod.yaml"
+      - "optional:prod.yaml"
+  application:
+    name: auth-svc
+  kafka:
+    consumer:
+      group-id: auth-svc
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  jpa:
+    open-in-view: false
+  data:
+    redis:
+      client-name: auth-svc
+      client-type: lettuce
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://127.0.0.1:8001/api/v1/auth/oauth2/jwks
+server:
+  port: 8001
+  forward-headers-strategy: framework
+  servlet:
+    context-path: /api/v1/auth
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /ui-docs
+  open-api:
+    info:
+      version: ${APP_VERSION}
+      title: Auth Service
+      description: Auth Service API
+      contact:
+        name: NgoDat0103
+        url: https://github.com/NGODAT0103
+        email: 21521935@gm.uit.edu.vn
+
+logging:
+  level:
+    com.github.ngodat0103.yamp.authsvc.service: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

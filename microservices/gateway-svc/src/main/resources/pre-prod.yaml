@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: pre-prod
+  cloud:
+    inetutils:
+      default-hostname: yamp-staging.ngodat0103.live
+  data:
+    redis:
+      url: redis://redis-svc-master:6379
+      client-name: gateway-svc
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /ui-docs
+    enabled: true
+    oauth:
+      use-basic-authentication-with-access-code-grant: true
+      client-id: ${CLIENT_ID}
+      client-secret: ${CLIENT_SECRET}
+    oauth2-redirect-url: https://${spring.cloud.inetutils.default-hostname}/webjars/swagger-ui/oauth2-redirect.html
+    urls:
+      - name: "auth-svc"
+        url: "https://${spring.cloud.inetutils.default-hostname}/api/v1/auth/api-docs"
+      - name: "user-svc"
+        url: "https://${spring.cloud.inetutils.default-hostname}/api/v1/user/api-docs"
+      - name: "product-svc"
+        url: "https://${spring.cloud.inetutils.default-hostname}/api/v1/product/api-docs"
+    use-root-path: true

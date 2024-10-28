@@ -1,0 +1,77 @@
+spring:
+  profiles:
+    default: local-dev
+  config:
+    import:
+      - "optional:local-dev.yaml"
+      - "optional:unit-test.yaml"
+      - "optional:demo.yaml"
+      - "optional:integration-test.yaml"
+      - "optional:pre-prod.yaml"
+      - "optional:prod.yaml"
+  application:
+    name: gateway-svc
+  security:
+   oauth2:
+     resourceserver:
+       jwt:
+         authorities-claim-name: "roles"
+         authority-prefix: "ROLE_"
+         jwk-set-uri: http://auth-svc:8001/api/v1/auth/oauth2/jwks
+  cloud:
+    gateway:
+      routes:
+        - id: user-svc
+          uri: http://user-svc:8002
+          predicates:
+            - Path=/api/v1/users/**
+        - id: product-svc
+          uri: http://product-svc:8003
+          predicates:
+            - Path=/api/v1/product/**
+#          filters:
+#            - name: RequestRateLimiter
+#              args:
+#                redis-rate-limiter.replenishRate: 1
+#                redis-rate-limiter.burstCapacity: 1
+#                redis-rate-limiter.requestedTokens: 1
+#            - name: Retry
+#              args:
+#                method: GET
+#                backoff:
+#                  firstBackoff: 100ms
+#                  maxBackoff: 1000ms
+#                  factor: 2
+#            - name: CircuitBreaker
+#              args:
+#                name: user-service-breaker
+#                fallbackUri: forward:/fallback
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+server:
+  port: 8000
+management:
+  observations:
+    key-values:
+        application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

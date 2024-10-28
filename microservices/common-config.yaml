@@ -1,0 +1,18 @@
+services:
+  network-deploy-service:
+    networks:
+      - yamp-network
+  microservice-base-config:
+    extends:
+      service: network-deploy-service
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    volumes:
+      - /home/akira/.m2:/home/akira/.m2:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: local-dev
+      JAVA_TOOL_OPTIONS: "-javaagent:/home/akira/.m2/repository/io/opentelemetry/javaagent/opentelemetry-javaagent/1.33.5/opentelemetry-javaagent-1.33.5.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      OTEL_METRICS_EXPORTER: none

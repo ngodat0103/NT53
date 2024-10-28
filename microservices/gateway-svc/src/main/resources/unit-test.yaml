@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: unit-test
+  application:
+    name: gateway-svc

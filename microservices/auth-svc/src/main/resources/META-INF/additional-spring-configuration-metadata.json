@@ -1,0 +1,43 @@
+{
+  "properties": [
+    {
+      "name": "springdoc.open-api.info.title",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.title."
+    },
+    {
+      "name": "springdoc.open-api.info.version",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.version."
+    },
+    {
+      "name": "springdoc.open-api.info.description",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.description."
+    },
+    {
+      "name": "springdoc.open-api.info.contact.name",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.contact.name."
+    },
+    {
+      "name": "springdoc.open-api.info.contact.uri",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.contact.uri."
+    },
+    {
+      "name": "springdoc.open-api.info.contact.email",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.contact.email."
+    },
+    {
+      "name": "springdoc.open-api.info.contact.url",
+      "type": "java.lang.String",
+      "description": "Description for springdoc.open-api.info.contact.url."
+    },
+    {
+      "name": "management.metric.tags.application",
+      "type": "java.lang.String",
+      "description": "Description for management.metric.tags.application."
+    }
+  ] }

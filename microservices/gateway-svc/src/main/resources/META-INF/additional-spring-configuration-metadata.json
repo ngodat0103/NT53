@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "network-mask.prefix",
+      "type": "java.lang.String",
+      "description": "Description for network-mask.prefix."
+  }
+] }

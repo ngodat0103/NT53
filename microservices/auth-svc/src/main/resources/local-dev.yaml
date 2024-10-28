@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    inetutils:
+      default-hostname: "yamp-backend.local"
+  config:
+    activate:
+      on-profile: local-dev
+  kafka:
+    bootstrap-servers: [ kafka-svc:9092 ]
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth-svc-db
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate.hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      url: redis://localhost:6379
+  security:
+    oauth2:
+      client:
+        provider:
+          auth-service-external:
+            authorization-uri: http://${spring.cloud.inetutils.default-hostname}:8000/api/v1/auth/oauth2/authorize
+            token-uri: http://${spring.cloud.inetutils.default-hostname}:8000/api/v1/auth/oauth2/token
+            jwk-set-uri: http://${spring.cloud.inetutils.default-hostname}:8000/api/v1/auth/oauth2/jwks
+      authorizationserver:
+        issuer: http://${spring.cloud.inetutils.default-hostname}:8000/api/v1/auth
+
+logging:
+  level:
+    com.github.ngodat0103.yamp.authsvc: DEBUG
+    org.springframework.security: DEBUG

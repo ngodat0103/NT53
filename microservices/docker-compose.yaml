@@ -1,0 +1,226 @@
+
+name: yamp-development-environment
+services:
+#  share-db:
+#    container_name: share-db
+#    image: postgres:16.3-bullseye
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: postgres
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#  redis-svc:
+#    container_name: redis-svc
+#    networks:
+#      - yamp-network
+#    image: redis:6.2.5
+#    ports:
+#      - "6379:6379"
+#  zookeeper:
+#    container_name: zookeeper
+#    image: confluentinc/cp-zookeeper:7.4.6
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#    ports:
+#      - "2181"
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#  kafka:
+#    restart: unless-stopped
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#    container_name: kafka
+#    hostname: kafka-svc
+#    image: confluentinc/cp-kafka:7.4.6
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka-svc:9092
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#  prometheus:
+#    image: prom/prometheus:v2.50.1
+#    container_name: prometheus
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#    command:
+#      - --config.file=/etc/prometheus/config.yaml
+#      - --web.enable-remote-write-receiver
+#      - --enable-feature=exemplar-storage
+#      - --enable-feature=native-histograms
+#    extra_hosts:
+#      - "user-svc:192.168.1.10"
+#      - "auth-svc:192.168.1.10"
+#      - "gateway-svc:192.168.1.10"
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./observation-and-monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro
+#  tempo:
+#    container_name: tempo
+#    image: grafana/tempo:latest
+#    command: -config.file=/etc/tempo/config.yaml
+#    volumes:
+#      - ./observation-and-monitoring/tempo/config.yaml:/etc/tempo/config.yaml:ro
+#    ports:
+#      - "3100"
+#      - "4317"
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#  grafana:
+#    container_name: grafana
+#    image: grafana/grafana:11.2.0
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#    volumes:
+#      - ./observation-and-monitoring/grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+#    environment:
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#      - GF_AUTH_DISABLE_LOGIN_FORM=true
+#      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor metricsSummary
+#    ports:
+#      - "3000:3000"
+#    healthcheck:
+#      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#  minio:
+#    container_name: minio
+#    hostname: minio
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#    image: minio/minio:RELEASE.2024-05-27T19-17-46Z
+#    entrypoint:
+#      - sh
+#      - -euc
+#      - |
+#        mkdir -p /data/loki-data && \
+#        mkdir -p /data/loki-ruler && \
+#        minio server /data
+#    environment:
+#      - MINIO_ROOT_USER=loki-dev
+#      - MINIO_ROOT_PASSWORD=loki-dev
+#      - MINIO_PROMETHEUS_AUTH_TYPE=public
+#      - MINIO_UPDATE=off
+#    ports:
+#      - "9000"
+#    volumes:
+#      - minio_data:/data
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+#      interval: 15s
+#      timeout: 20s
+#      retries: 5
+#  loki:
+#    container_name: loki
+#    image: grafana/loki:3.0.0
+#    volumes:
+#      - ./observation-and-monitoring/loki/config.yaml:/etc/loki/config.yaml:ro
+#    ports:
+#      - "3100"
+#      - "7946"
+#    command: "-config.file=/etc/loki/config.yaml --print-config-stderr"
+#    depends_on:
+#      - minio
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+#  alloy:
+#    image: grafana/alloy:v1.4.3
+#    container_name: alloy
+#    volumes:
+#      - ./observation-and-monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+#    ports:
+#      - "12345:12345"
+#    extends:
+#      file: common-config.yaml
+#      service: network-deploy-service
+  user-svc:
+    container_name: user-svc
+    image: ghcr.io/ngodat0103/nt531/user-svc:tracing-dev
+    build:
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: user-svc
+        VERSION: 0.0.1
+        SERVICE_PORT: 8002
+#    depends_on:
+#      - share-db
+#      - tempo
+#      - kafka
+    extends:
+      file: common-config.yaml
+      service: microservice-base-config
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://share-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=user-svc-user
+      - SPRING_DATASOURCE_PASSWORD=user-svc-user-password
+
+  gateway-svc:
+    container_name: gateway-svc
+    image: ghcr.io/ngodat0103/nt531/gateway-svc:tracing-dev
+    build:
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: gateway-svc
+        VERSION: 0.0.1
+        SERVICE_PORT: 8000
+    extends:
+      file: common-config.yaml
+      service: microservice-base-config
+    ports:
+      - "8000:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local-dev
+  auth-svc:
+    container_name: auth-svc
+    image: ghcr.io/ngodat0103/nt531/auth-svc:tracing-dev
+    build:
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: auth-svc
+        VERSION: 0.0.1
+        SERVICE_PORT: 8001
+#    depends_on:
+#      - share-db
+#      - kafka
+    extends:
+      file: common-config.yaml
+      service: network-deploy-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=local-dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://share-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=auth-svc-user
+      - SPRING_DATASOURCE_PASSWORD=auth-svc-user-password
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-svc:9092
+volumes:
+  minio_data:
+    name: minio_data
+  postgres-data:
+    name: postgres-data
+    external: true
+networks:
+  yamp-network:
+    name: yamp-network-development
