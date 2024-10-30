@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "auth-svc.fullname" . }}-monitor
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      {{- include "auth-svc.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /api/v1/auth/actuator/prometheus
+      interval: 15s

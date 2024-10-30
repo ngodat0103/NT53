@@ -16,7 +16,7 @@ spring:
     activate:
       on-profile: local-dev
   datasource:
-    url: jdbc:postgresql://share-db:5432/user-svc-db
+    url: jdbc:postgresql://localhost:5432/user-svc-db
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true

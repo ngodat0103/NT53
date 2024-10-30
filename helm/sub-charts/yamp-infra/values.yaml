@@ -1,0 +1,28 @@
+kafka:
+  fullnameOverride: kafka-svc
+  listeners:
+    client:
+      protocol: PLAINTEXT
+redis:
+  fullnameOverride: redis-svc
+  architecture: standalone
+  auth:
+    enabled: false
+    password: redis-dev
+    sentinel: false
+postgresql:
+  primary:
+    initdb:
+      scripts:
+        initdb-user.sql: |-
+          CREATE ROLE "auth-svc-user";
+          ALTER ROLE "auth-svc-user" WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:Qm5oBTqW81NGJud86DM6SQ==$CukmY0k5I1jxBK+rLNHWLdnVJCLmoA6kw0EBbFaL7Rk=:y7YFCbaVBlZzy7mSS2l6gEJG85aoHu7vv+EZX9rqukc=';
+          CREATE ROLE "user-svc-user";
+          ALTER ROLE "user-svc-user" WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:LfLOcV7VvlKevx+chrsnPw==$t5rQLup4773uyMHt9FFwbfS+b4xXuMEKNEiawgTi+qA=:z7/7kF2PET2hmULiF1KC4ANc7+GSuwOW/crHrI6Ri2k=';
+          CREATE DATABASE "auth-svc-db" WITH OWNER = "auth-svc-user" ENCODING = 'UTF8' CONNECTION LIMIT = -1;
+          CREATE DATABASE "user-svc-db" WITH OWNER = "user-svc-user" ENCODING = 'UTF8' CONNECTION LIMIT = -1;
+global:
+  postgresql:
+    auth:
+      postgresPassword: postgres
+

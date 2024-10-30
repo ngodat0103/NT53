@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  auth-svc:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-10-29T13:48:54.0173394+07:00"
+    description: A Helm chart for auth-svc
+    digest: 813b9fd28031a5e4878b7affffcaf0297842b3f858380e0326f0d66e0b02e6b9
+    name: auth-svc
+    type: application
+    urls:
+    - charts/auth-svc-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-10-29T13:48:54.0168334+07:00"

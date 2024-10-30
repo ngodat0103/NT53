@@ -22,7 +22,7 @@ public class SecurityConfiguration {
     http.authorizeExchange(
         exchange ->
             exchange
-                .pathMatchers("/actuator/health/liveness", "/actuator/health/readiness")
+                .pathMatchers("/actuator/health/livenessState", "/actuator/health/readinessState")
                 .permitAll()
                 .pathMatchers("/actuator/prometheus")
                 .permitAll()

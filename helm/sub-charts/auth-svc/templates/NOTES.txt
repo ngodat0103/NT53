@@ -1,0 +1,27 @@
+Thank you for installing auth-svc!
+
+Your release is named: {{ .Release.Name }}
+
+To learn more about the release, you can run:
+
+  helm status {{ .Release.Name }}
+  helm get all {{ .Release.Name }}
+
+To get the logs of the auth-svc pods, you can run:
+
+  kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Values.namespace }}
+
+To port forward the auth-svc service to your local machine, you can run:
+
+  kubectl port-forward svc/{{ include "auth-svc.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }} -n {{ .Values.namespace }}
+
+This will forward the service port {{ .Values.service.port }} to your local machine, allowing you to access the service at http://localhost:{{ .Values.service.port }}.
+
+To check the health of the auth-svc, you can access the following endpoints:
+
+  Liveness Probe: http://localhost:{{ .Values.service.port }}/api/v1/auth/actuator/health/liveness
+  Readiness Probe: http://localhost:{{ .Values.service.port }}/api/v1/auth/actuator/health/readiness
+
+For more information on the application, please refer to the documentation or contact the support team.
+
+Thank you for using auth-svc!

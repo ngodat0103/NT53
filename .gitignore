@@ -12,3 +12,9 @@
 /development-environment/docker/init.sql
 /kafka/
 *ghcr-secret.yml
+**/test.yaml
+/helm/yamp-umbrella/test.yaml
+/tf/.terraform/
+/microservices/.idea/
+/.vscode/
+/tf/secrets/

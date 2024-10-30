@@ -21,14 +21,14 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: auth-svc
+          uri: http://auth-svc:8001
+          predicates:
+            - Path=/api/v1/auth/**
         - id: user-svc
           uri: http://user-svc:8002
           predicates:
             - Path=/api/v1/users/**
-        - id: product-svc
-          uri: http://product-svc:8003
-          predicates:
-            - Path=/api/v1/product/**
 #          filters:
 #            - name: RequestRateLimiter
 #              args:

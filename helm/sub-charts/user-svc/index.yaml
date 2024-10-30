@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  product-svc:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-10-02T21:28:59.8972578+07:00"
+    description: A Helm chart for product-svc
+    digest: a680fbc7166b1775fb540ac3e1f5ce8363dbce5d21041d7c85a10c78d601b9cb
+    name: product-svc
+    type: application
+    urls:
+    - charts/product-svc-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-10-02T21:28:59.896717+07:00"

@@ -1,14 +1,10 @@
-- name: Init-k8s-resources
+- name: Install application resources
   hosts: masters
   become: true
   tasks:
-    - name: Make sure the cluster have install Flannel CNI
-      kubernetes.core.k8s:
-        state: present
-        src: "https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"
-    - name: Add Prometheus repository
+    - name: Add ArgoCd repository
       kubernetes.core.helm_repository:
-        name: prometheus-community
+        name: argocd
         repo_url: https://prometheus-community.github.io/helm-charts
         state: present
     - name: Add Longhorn repository
