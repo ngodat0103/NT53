@@ -31,10 +31,20 @@ variable "image" {
 variable "pub_key_path" {
     description = "Path to public key"
     type        = string
-    default     = "./secrets/id_rsa.pub"
+    default     = "./secrets/id-rsa.pub"
 }
 variable boot_disk_size {
   description = "Size of boot disk"
   type        = number
   default     = 30
+}
+variable "network" {
+  description = "Network for instances"
+  type        = string
+  default     = "default"
+}
+variable "subnetwork" {
+  description = "Subnetwork for instances"
+  type        = string
+  default     = "default"
 }
