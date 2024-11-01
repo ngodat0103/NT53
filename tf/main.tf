@@ -1,9 +1,3 @@
-variable "project_id" {
-  description = "The project ID to deploy into"
-  type        = string
-}
-
-
 provider "google" {
   credentials = file("./secrets/auth-gcp.json")
   project     = var.project_id
@@ -18,13 +12,28 @@ module "network" {
   project_id   = var.project_id
   subnets = [
     {
-      subnet_name   = "k8s-network-subnet"
-      subnet_ip     = "172.18.0.0/16"
-      subnet_region = "asia-southeast1"
+      subnet_name   = "k8s-master-nodes-subnet"
+      subnet_ip     = "172.20.0.0/16"
+      subnet_region = var.master-nodes-region
       description   = "Subnet for k8s-network"
     },
+    {
+      subnet_name   = "k8s-worker-nodes-subnet"
+      subnet_ip     = "172.21.0.0/16"
+      subnet_region = var.worker-nodes-region
+      description = "Subnet for worker nodes"
+    }
   ]
   firewall_rules = [
+    {
+      name = "allow-ping-ingress"
+      direction = "INGRESS"
+      allow = [
+        {
+          protocol = "icmp"
+        }
+      ]
+    }, 
     {
       name = "allow-ssh-ingress"
       # network       = "k8s-network"
@@ -53,11 +62,11 @@ module "network" {
 module "instances" {
   source         = "./modules/instances"
   network        = module.network.network_name
-  subnetwork     = module.network.subnets_names[0]
-  n_workers      = 3
+  master-nodes-subnet =  module.network.subnets["${var.master-nodes-region}/k8s-master-nodes-subnet"].name
+  worker-nodes-subnet = module.network.subnets["${var.worker-nodes-region}/k8s-worker-nodes-subnet"].name
   machine_type   = "e2-medium"
-  region         = "asia-southeast1"
-  zone           = "asia-southeast1-a"
   environment    = "dev"
+  n-master-nodes = var.n_master_nodes
+  n-worker-nodes = var.n_worker_nodes
   boot_disk_size = 30
 }

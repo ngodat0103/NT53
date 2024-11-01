@@ -1,21 +1,29 @@
-resource "google_compute_address" "k8s_master_ip" {
-  name    = "${var.environment}-master-ip"
-  region  = "${var.region}"
+resource "google_compute_address" "k8s-master-nodes-internal-ip" {
+  count  = var.n-master-nodes
+  name    = "k8s-master-${count.index}-internal-ip"
+  region  = "${var.master-nodes-region}"
   address_type = "INTERNAL"
-  subnetwork = var.subnetwork
+  subnetwork = var.master-nodes-subnet
 }
-resource "google_compute_address" "k8s-worker-nodes-ip" {
-  count   = var.n_workers
-  subnetwork = var.subnetwork
-  name    = "k8s-worker-${count.index}-ip"
-  region  = var.region
+resource "google_compute_address" "k8s-master-nodes-public-ip" {
+  count   = var.n-master-nodes
+  name    = "k8s-master-${count.index}-public-ip"
+  region  = "${var.master-nodes-region}"
+  address_type = "EXTERNAL"
+}
+resource "google_compute_address" "k8s-worker-nodes-internal-ip" {
+  count   = var.n-worker-nodes
+  subnetwork = var.worker-nodes-subnet
+  name    = "k8s-worker-${count.index}-internal-ip"
+  region  = var.worker-nodes-region
   address_type = "INTERNAL"
 }
 
 resource "google_compute_instance" "k8s_master" {
-  name         = "${var.environment}-k8s-master"
+  count       = var.n-master-nodes
+  name         = "k8s-master-${count.index}"
   machine_type = var.machine_type
-  zone         = var.zone
+  zone = var.master-nodes-zone
 
   boot_disk {
     initialize_params {
@@ -25,9 +33,11 @@ resource "google_compute_instance" "k8s_master" {
 
   network_interface {
     network       = var.network
-    subnetwork    = var.subnetwork
-    network_ip    = google_compute_address.k8s_master_ip.address  
-    access_config {}  
+    subnetwork    = var.master-nodes-subnet
+    network_ip    = google_compute_address.k8s-master-nodes-internal-ip[count.index].address  
+    access_config {
+      nat_ip = google_compute_address.k8s-master-nodes-public-ip[count.index].address
+    }  
   }
 
   metadata = {
@@ -37,21 +47,18 @@ resource "google_compute_instance" "k8s_master" {
   metadata_startup_script = <<-EOT
     #!/bin/bash
     useradd -m -s /bin/bash k8s-admin
-    echo "k8s-admin:admin" | chpasswd
+    echo "k8s-admin:k8s-admin" | chpasswd
     usermod -aG sudo k8s-admin
-    echo "k8s-admin ALL=(ALL) ALL" >> /etc/sudoers.d/k8s-admin
-    chmod 0440 /etc/sudoers.d/k8s-admin
-    pip3 -m pip install kubernetes
   EOT
 
   tags = []
 }
 
 resource "google_compute_instance" "k8s-worker-nodes" {
-  count        = var.n_workers
-  name         = "${var.environment}-k8s-worker-${count.index}"
+  count        = var.n-worker-nodes
+  name         = "k8s-worker-${count.index}"
   machine_type = var.machine_type
-  zone         = var.zone
+  zone         = var.worker-nodes-zone
 
   boot_disk {
     initialize_params {
@@ -61,8 +68,8 @@ resource "google_compute_instance" "k8s-worker-nodes" {
 
   network_interface {
     network       = var.network
-    subnetwork    = var.subnetwork
-    network_ip    = google_compute_address.k8s-worker-nodes-ip[count.index].address 
+    subnetwork    = var.worker-nodes-subnet
+    network_ip    = google_compute_address.k8s-worker-nodes-internal-ip[count.index].address 
     access_config {}
   }
 
@@ -71,13 +78,10 @@ resource "google_compute_instance" "k8s-worker-nodes" {
   }
 
   metadata_startup_script = <<-EOT
-    #!/bin/bash
+   #!/bin/bash
     useradd -m -s /bin/bash k8s-admin
-    echo "k8s-admin:admin" | chpasswd
+    echo "k8s-admin:k8s-admin" | chpasswd
     usermod -aG sudo k8s-admin
-    echo "k8s-admin ALL=(ALL) ALL" >> /etc/sudoers.d/k8s-admin
-    chmod 0440 /etc/sudoers.d/k8s-admin
-    pip3 -m pip install kubernetes
   EOT
   tags = []
 }
