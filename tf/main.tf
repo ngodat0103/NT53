@@ -1,5 +1,5 @@
 provider "google" {
-  credentials = file("./secrets/auth-gcp.json")
+  credentials = file("~/.config/gcloud/application_default_credentials.json")
   project     = var.project_id
   region      = "asia-southeast1"
   zone        = "asia-southeast1-a"

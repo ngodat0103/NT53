@@ -46,7 +46,7 @@ variable "image" {
 variable "pub_key_path" {
     description = "Path to public key"
     type        = string
-    default     = "./secrets/id-rsa.pub"
+    default     = "./secrets/id_rsa.pub"
 }
 variable boot_disk_size {
   description = "Size of boot disk"

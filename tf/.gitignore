@@ -3,3 +3,6 @@
 *.lock
 .terraform/
 .terraform.lock.hcl
+ansible_inventory.ini
+terraform-output.json
+*.ini
